@@ -1,7 +1,8 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background: #ffe135;
+    background: url('Images/A1.jpg') no-repeat center center fixed;
+    background-size: cover;
     margin: 0;
     padding: 0;
 }
