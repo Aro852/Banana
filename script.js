@@ -55,7 +55,7 @@ function generateAnswerButtons(correctAnswer) {
     });
 }
 
-// Check selected answer
+
 function checkAnswer(selectedAnswer) {
     const correctAnswer = puzzles[currentPuzzleIndex].solution;
 
