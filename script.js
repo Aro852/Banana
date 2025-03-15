@@ -32,18 +32,41 @@ function loadPuzzle() {
     }
 }
 
-// Generate four answer choices (1 correct + 3 random)
+function startTimer() {
+    clearInterval(timer); 
+    timeLeft = 30;
+    timerDisplay.textContent = `Time Left: ${timeLeft}s`;
+
+    timer = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = `Time Left: ${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            message.textContent = "⏳ Time's Up! ❌";
+            lives--;
+            livesDisplay.textContent = `Lives: ${lives}`;
+            if (lives <= 0) {
+                gameOver();
+            } else {
+                nextPuzzle();
+            }
+        }
+    }, 1000);
+}
+
+
 function generateAnswerButtons(correctAnswer) {
     answerOptions.innerHTML = "";
     let choices = new Set();
     choices.add(correctAnswer);
 
-    // Generate three random numbers (0-9) that are not the correct answer
+  
     while (choices.size < 4) {
         choices.add(Math.floor(Math.random() * 10).toString());
     }
 
-    // Shuffle choices
+
     let shuffledChoices = Array.from(choices).sort(() => Math.random() - 0.5);
 
     shuffledChoices.forEach(choice => {
@@ -77,13 +100,13 @@ function checkAnswer(selectedAnswer) {
     }
 }
 
-// Load the next puzzle
+
 function nextPuzzle() {
     currentPuzzleIndex++;
     setTimeout(loadPuzzle, 1000);
 }
 
-// End game logic
+
 function gameOver() {
     message.textContent = `Game Over! Final Score: ${score}`;
     answerOptions.innerHTML = "";
@@ -97,7 +120,6 @@ function gameOver() {
     highScoreDisplay.textContent = highScore;
 }
 
-// Restart game
 function restartGame() {
     currentPuzzleIndex = 0;
     score = 0;
@@ -108,8 +130,7 @@ function restartGame() {
     loadPuzzle();
 }
 
-// Event listener for retry button
+
 retryBtn.addEventListener('click', restartGame);
 
-// Start game
 loadPuzzle();
