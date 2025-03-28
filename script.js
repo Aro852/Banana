@@ -9,6 +9,8 @@ let currentPuzzleIndex = 0;
 let score = 0;
 let lives = 3;
 let highScore = localStorage.getItem('highScore') || 0;
+let timer; 
+let timeLeft = 30;
 
 const puzzleImage = document.getElementById('puzzleImage');
 const answerOptions = document.getElementById('answerOptions');
@@ -17,20 +19,15 @@ const scoreDisplay = document.getElementById('score');
 const livesDisplay = document.getElementById('lives');
 const highScoreDisplay = document.getElementById('highScoreDisplay');
 const retryBtn = document.getElementById('retryBtn');
+const timerDisplay = document.createElement('p'); 
+
+timerDisplay.id = "timer";
+timerDisplay.style.fontSize = "1.2em";
+timerDisplay.style.fontWeight = "bold";
+timerDisplay.style.color = "red";
+document.querySelector(".game-container").insertBefore(timerDisplay, answerOptions);
 
 highScoreDisplay.textContent = highScore;
-
-// Load a new puzzle
-function loadPuzzle() {
-    if (currentPuzzleIndex < puzzles.length) {
-        const puzzle = puzzles[currentPuzzleIndex];
-        puzzleImage.src = puzzle.image;
-        message.textContent = '';
-        generateAnswerButtons(puzzle.solution);
-    } else {
-        gameOver();
-    }
-}
 
 function startTimer() {
     clearInterval(timer); 
@@ -55,17 +52,26 @@ function startTimer() {
     }, 1000);
 }
 
+function loadPuzzle() {
+    if (currentPuzzleIndex < puzzles.length) {
+        const puzzle = puzzles[currentPuzzleIndex];
+        puzzleImage.src = puzzle.image;
+        message.textContent = '';
+        generateAnswerButtons(puzzle.solution);
+        startTimer(); 
+    } else {
+        gameOver();
+    }
+}
 
 function generateAnswerButtons(correctAnswer) {
     answerOptions.innerHTML = "";
     let choices = new Set();
     choices.add(correctAnswer);
 
-  
     while (choices.size < 4) {
         choices.add(Math.floor(Math.random() * 10).toString());
     }
-
 
     let shuffledChoices = Array.from(choices).sort(() => Math.random() - 0.5);
 
@@ -78,8 +84,8 @@ function generateAnswerButtons(correctAnswer) {
     });
 }
 
-
 function checkAnswer(selectedAnswer) {
+    clearInterval(timer);
     const correctAnswer = puzzles[currentPuzzleIndex].solution;
 
     if (selectedAnswer === correctAnswer) {
@@ -100,14 +106,13 @@ function checkAnswer(selectedAnswer) {
     }
 }
 
-
 function nextPuzzle() {
     currentPuzzleIndex++;
     setTimeout(loadPuzzle, 1000);
 }
 
-
 function gameOver() {
+    clearInterval(timer);
     message.textContent = `Game Over! Final Score: ${score}`;
     answerOptions.innerHTML = "";
     retryBtn.style.display = "block";
@@ -129,7 +134,6 @@ function restartGame() {
     retryBtn.style.display = "none";
     loadPuzzle();
 }
-
 
 retryBtn.addEventListener('click', restartGame);
 
