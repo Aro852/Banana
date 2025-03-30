@@ -1,12 +1,13 @@
-/* General Page Styling */
+/* Background Image for Signin & Signup Pages */
 body {
     font-family: 'Poppins', Arial, sans-serif;
     text-align: center;
-    background: url('Images/A1.jpg') no-repeat center center fixed;
+    background: url('Images/A.2jpg.webp') no-repeat center center fixed;
     background-size: cover;
     margin: 0;
     padding: 0;
     color: #fff;
+    position: relative;
 }
 
 /* Game Container with Glassmorphism Effect */
