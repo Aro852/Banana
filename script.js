@@ -1,15 +1,7 @@
-const puzzles = [
-    { image: 'https://www.sanfoh.com/uob/banana/data/tce25c4945f7e898920620665can68.png', solution: '8' },
-    { image: 'https://www.sanfoh.com/uob/banana/data/tcf78297aed7ad12fd47a985607n76.png', solution: '6' },
-    { image: 'https://www.sanfoh.com/uob/banana/data/td34b97440e19a5a12be585150fn80.png', solution: '0' },
-    { image: 'https://www.sanfoh.com/uob/banana/data/td395b9299083da2761ad6bde27n117.png', solution: '7' }
-];
-
-let currentPuzzleIndex = 0;
 let score = 0;
 let lives = 3;
 let highScore = localStorage.getItem('highScore') || 0;
-let timer; 
+let timer;
 let timeLeft = 30;
 
 const puzzleImage = document.getElementById('puzzleImage');
@@ -19,7 +11,7 @@ const scoreDisplay = document.getElementById('score');
 const livesDisplay = document.getElementById('lives');
 const highScoreDisplay = document.getElementById('highScoreDisplay');
 const retryBtn = document.getElementById('retryBtn');
-const timerDisplay = document.createElement('p'); 
+const timerDisplay = document.createElement('p');
 
 timerDisplay.id = "timer";
 timerDisplay.style.fontSize = "1.2em";
@@ -29,8 +21,26 @@ document.querySelector(".game-container").insertBefore(timerDisplay, answerOptio
 
 highScoreDisplay.textContent = highScore;
 
+async function fetchPuzzle() {
+    try {
+        const apiUrl = "https://marcconrad.com/uob/banana/api.php?out=json";
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Fetched Puzzle:", data); // Debugging: Check the response
+        return data;
+    } catch (error) {
+        console.error('Error fetching puzzle:', error);
+        return null;
+    }
+}
+
 function startTimer() {
-    clearInterval(timer); 
+    clearInterval(timer);
     timeLeft = 30;
     timerDisplay.textContent = `Time Left: ${timeLeft}s`;
 
@@ -46,21 +56,22 @@ function startTimer() {
             if (lives <= 0) {
                 gameOver();
             } else {
-                nextPuzzle();
+                loadPuzzle();
             }
         }
     }, 1000);
 }
 
-function loadPuzzle() {
-    if (currentPuzzleIndex < puzzles.length) {
-        const puzzle = puzzles[currentPuzzleIndex];
-        puzzleImage.src = puzzle.image;
+async function loadPuzzle() {
+    const puzzle = await fetchPuzzle();
+    if (puzzle && puzzle.question && puzzle.solution) {
+        puzzleImage.src = puzzle.question; // Corrected image URL
+        puzzleImage.alt = "Banana Puzzle";
         message.textContent = '';
         generateAnswerButtons(puzzle.solution);
-        startTimer(); 
+        startTimer();
     } else {
-        gameOver();
+        message.textContent = "❌ Failed to load puzzle. Try again.";
     }
 }
 
@@ -79,14 +90,13 @@ function generateAnswerButtons(correctAnswer) {
         let button = document.createElement("button");
         button.textContent = choice;
         button.classList.add("answer-btn");
-        button.onclick = () => checkAnswer(choice);
+        button.onclick = () => checkAnswer(choice, correctAnswer);
         answerOptions.appendChild(button);
     });
 }
 
-function checkAnswer(selectedAnswer) {
+function checkAnswer(selectedAnswer, correctAnswer) {
     clearInterval(timer);
-    const correctAnswer = puzzles[currentPuzzleIndex].solution;
 
     if (selectedAnswer === correctAnswer) {
         score += 10;
@@ -102,13 +112,8 @@ function checkAnswer(selectedAnswer) {
     if (lives <= 0) {
         gameOver();
     } else {
-        nextPuzzle();
+        setTimeout(loadPuzzle, 1000);
     }
-}
-
-function nextPuzzle() {
-    currentPuzzleIndex++;
-    setTimeout(loadPuzzle, 1000);
 }
 
 function gameOver() {
@@ -126,7 +131,6 @@ function gameOver() {
 }
 
 function restartGame() {
-    currentPuzzleIndex = 0;
     score = 0;
     lives = 3;
     scoreDisplay.textContent = `Score: ${score}`;
