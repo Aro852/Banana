@@ -22,5 +22,13 @@
         </div>
     </div>
     <script src="script.js"></script>
+	<script>
+        let playerName = localStorage.getItem("playerName");
+        if (!playerName) {
+            playerName = prompt("Enter your name:") || "Player";
+            localStorage.setItem("playerName", playerName);
+        }
+        document.getElementById("playerNameDisplay").textContent = `Player: ${playerName}`;
+    </script>
 </body>
 </html>
