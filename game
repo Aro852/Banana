@@ -28,7 +28,29 @@
             playerName = prompt("Enter your name:") || "Player";
             localStorage.setItem("playerName", playerName);
         }
+	
         document.getElementById("playerNameDisplay").textContent = `Player: ${playerName}`;
+		
+		    // Play sound on button click
+                document.querySelectorAll('.btn-sound').forEach(button => {
+            button.addEventListener('click', () => {
+                document.getElementById('buttonClickSound').play();
+            });
+        });
+      // Define audio elements
+let clickSound = new Audio("sounds/button.mp3");  // Make sure the path is correct
+let correctSound = new Audio("sounds/button.mp3");
+let wrongSound = new Audio("sounds/button.mp3");
+
+// Function to play click sound
+function playClickSound() {
+    clickSound.currentTime = 0; // Reset audio to start
+    clickSound.play();
+}
+
+// Example: Attach click sound to a button
+document.getElementById("retryBtn").addEventListener("click", playClickSound);
+		
     </script>
 </body>
 </html>
