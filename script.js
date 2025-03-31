@@ -1,14 +1,8 @@
-const puzzles = [
-    { image: 'https://www.sanfoh.com/uob/banana/data/tce25c4945f7e898920620665can68.png', solution: '8' },
-    { image: 'https://www.sanfoh.com/uob/banana/data/tcf78297aed7ad12fd47a985607n76.png', solution: '6' },
-    { image: 'https://www.sanfoh.com/uob/banana/data/td34b97440e19a5a12be585150fn80.png', solution: '0' },
-    { image: 'https://www.sanfoh.com/uob/banana/data/td395b9299083da2761ad6bde27n117.png', solution: '7' }
-];
-
-let currentPuzzleIndex = 0;
 let score = 0;
 let lives = 3;
 let highScore = localStorage.getItem('highScore') || 0;
+let timer;
+let timeLeft = 30;
 
 const puzzleImage = document.getElementById('puzzleImage');
 const answerOptions = document.getElementById('answerOptions');
@@ -17,47 +11,92 @@ const scoreDisplay = document.getElementById('score');
 const livesDisplay = document.getElementById('lives');
 const highScoreDisplay = document.getElementById('highScoreDisplay');
 const retryBtn = document.getElementById('retryBtn');
+const timerDisplay = document.createElement('p');
+
+timerDisplay.id = "timer";
+timerDisplay.style.fontSize = "1.2em";
+timerDisplay.style.fontWeight = "bold";
+timerDisplay.style.color = "red";
+document.querySelector(".game-container").insertBefore(timerDisplay, answerOptions);
 
 highScoreDisplay.textContent = highScore;
 
-// Load a new puzzle
-function loadPuzzle() {
-    if (currentPuzzleIndex < puzzles.length) {
-        const puzzle = puzzles[currentPuzzleIndex];
-        puzzleImage.src = puzzle.image;
-        message.textContent = '';
-        generateAnswerButtons(puzzle.solution);
-    } else {
-        gameOver();
+async function fetchPuzzle() {
+    try {
+        const apiUrl = "https://marcconrad.com/uob/banana/api.php?out=json";
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Fetched Puzzle:", data); // Debugging: Check the response
+        return data;
+    } catch (error) {
+        console.error('Error fetching puzzle:', error);
+        return null;
     }
 }
 
-// Generate four answer choices (1 correct + 3 random)
+function startTimer() {
+    clearInterval(timer);
+    timeLeft = 30;
+    timerDisplay.textContent = `Time Left: ${timeLeft}s`;
+
+    timer = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = `Time Left: ${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            message.textContent = "⏳ Time's Up! ❌";
+            lives--;
+            livesDisplay.textContent = `Lives: ${lives}`;
+            if (lives <= 0) {
+                gameOver();
+            } else {
+                loadPuzzle();
+            }
+        }
+    }, 1000);
+}
+
+async function loadPuzzle() {
+    const puzzle = await fetchPuzzle();
+    if (puzzle && puzzle.question && puzzle.solution) {
+        puzzleImage.src = puzzle.question; // Corrected image URL
+        puzzleImage.alt = "Banana Puzzle";
+        message.textContent = '';
+        generateAnswerButtons(puzzle.solution);
+        startTimer();
+    } else {
+        message.textContent = "❌ Failed to load puzzle. Try again.";
+    }
+}
+
 function generateAnswerButtons(correctAnswer) {
     answerOptions.innerHTML = "";
     let choices = new Set();
     choices.add(correctAnswer);
 
-    // Generate three random numbers (0-9) that are not the correct answer
     while (choices.size < 4) {
         choices.add(Math.floor(Math.random() * 10).toString());
     }
 
-    // Shuffle choices
     let shuffledChoices = Array.from(choices).sort(() => Math.random() - 0.5);
 
     shuffledChoices.forEach(choice => {
         let button = document.createElement("button");
         button.textContent = choice;
         button.classList.add("answer-btn");
-        button.onclick = () => checkAnswer(choice);
+        button.onclick = () => checkAnswer(choice, correctAnswer);
         answerOptions.appendChild(button);
     });
 }
 
-// Check selected answer
-function checkAnswer(selectedAnswer) {
-    const correctAnswer = puzzles[currentPuzzleIndex].solution;
+function checkAnswer(selectedAnswer, correctAnswer) {
+    clearInterval(timer);
 
     if (selectedAnswer === correctAnswer) {
         score += 10;
@@ -73,18 +112,12 @@ function checkAnswer(selectedAnswer) {
     if (lives <= 0) {
         gameOver();
     } else {
-        nextPuzzle();
+        setTimeout(loadPuzzle, 1000);
     }
 }
 
-// Load the next puzzle
-function nextPuzzle() {
-    currentPuzzleIndex++;
-    setTimeout(loadPuzzle, 1000);
-}
-
-// End game logic
 function gameOver() {
+    clearInterval(timer);
     message.textContent = `Game Over! Final Score: ${score}`;
     answerOptions.innerHTML = "";
     retryBtn.style.display = "block";
@@ -97,9 +130,7 @@ function gameOver() {
     highScoreDisplay.textContent = highScore;
 }
 
-// Restart game
 function restartGame() {
-    currentPuzzleIndex = 0;
     score = 0;
     lives = 3;
     scoreDisplay.textContent = `Score: ${score}`;
@@ -108,8 +139,6 @@ function restartGame() {
     loadPuzzle();
 }
 
-// Event listener for retry button
 retryBtn.addEventListener('click', restartGame);
 
-// Start game
 loadPuzzle();

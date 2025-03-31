@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banana Puzzle Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>🍌 Banana Puzzle Game 🍌</h1>
+        <p class="high-score">High Score: <span id="highScoreDisplay">0</span></p>
+        <div class="puzzle-box">
+            <img id="puzzleImage" src="" alt="Puzzle">
+        </div>
+        <div id="answerOptions"></div>
+        <p id="message"></p>
+        <button id="retryBtn" style="display:none;">Retry</button>
+        <div class="stats">
+            <p id="score">Score: 0</p>
+            <p id="lives">Lives: 3</p>
+        </div>
+    </div>
+	<audio id="buttonClickSound" src="Sounds/button.mp3"></audio>
+    <script src="script.js"></script>
+	<script>
+        let playerName = localStorage.getItem("playerName");
+        if (!playerName) {
+            playerName = prompt("Enter your name:") || "Player";
+            localStorage.setItem("playerName", playerName);
+        }
+	
+        document.getElementById("playerNameDisplay").textContent = `Player: ${playerName}`;
+		
+		    // Play sound on button click
+                document.querySelectorAll('.btn-sound').forEach(button => {
+            button.addEventListener('click', () => {
+                document.getElementById('buttonClickSound').play();
+            });
+        });
+      // Define audio elements
+let clickSound = new Audio("sounds/button.mp3");  // Make sure the path is correct
+let correctSound = new Audio("sounds/button.mp3");
+let wrongSound = new Audio("sounds/button.mp3");
+
+// Function to play click sound
+function playClickSound() {
+    clickSound.currentTime = 0; // Reset audio to start
+    clickSound.play();
+}
+
+// Example: Attach click sound to a button
+document.getElementById("retryBtn").addEventListener("click", playClickSound);
+		
+    </script>
+</body>
+</html>
