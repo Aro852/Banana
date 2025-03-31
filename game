@@ -21,6 +21,7 @@
             <p id="lives">Lives: 3</p>
         </div>
     </div>
+	<audio id="buttonClickSound" src="Sounds/button.mp3"></audio>
     <script src="script.js"></script>
 	<script>
         let playerName = localStorage.getItem("playerName");
